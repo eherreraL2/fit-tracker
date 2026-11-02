@@ -1,0 +1,146 @@
+:root {
+  --bg: #111418;
+  --surface: #1a1f25;
+  --border: #2a3038;
+  --text: #e6e9ed;
+  --muted: #8b949e;
+  --accent: #e8ff5a;
+  --danger: #ff6b6b;
+
+  color-scheme: dark;
+  font: 16px/1.45 -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px);
+  display: grid;
+  gap: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.subtitle,
+.hint {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.hint {
+  margin: 0 0 12px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.checks {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.checks div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.checks dt {
+  color: var(--muted);
+}
+
+.checks dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.probe-form {
+  display: flex;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  /* 16px+ avoids iOS auto-zoom on focus */
+  font-size: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #111418;
+  cursor: pointer;
+}
+
+button.secondary {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.error {
+  color: var(--danger);
+  margin: 8px 0 0;
+}
+
+.probes {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.probes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.probes time {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
