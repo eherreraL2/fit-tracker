@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { ExerciseLogger } from '../components/ExerciseLogger'
 import { ExercisePicker } from '../components/ExercisePicker'
+import { isBackupDue } from '../db/backup'
 import { db, type Session } from '../db/db'
 import {
   addExerciseToSession,
@@ -82,14 +83,21 @@ function ActiveSession({ session }: { session: Session }) {
   )
 }
 
-function Idle() {
+function Idle({ onOpenSettings }: { onOpenSettings: () => void }) {
   const last = useLiveQuery(async () => (await listFinishedSessions(db))[0] ?? null, [])
+  const backupDue = useLiveQuery(() => isBackupDue(db), [])
 
   return (
     <>
       <header className="screen-header">
         <h1>Entrenar</h1>
       </header>
+      {backupDue && (
+        <button type="button" className="banner" onClick={onOpenSettings}>
+          <strong>Haz una copia de seguridad</strong>
+          <span>Tus entrenamientos solo están en este iPhone. Toca para exportarlos.</span>
+        </button>
+      )}
       <button type="button" className="full big" onClick={() => void startSession(db)}>
         Empezar entrenamiento
       </button>
@@ -106,9 +114,9 @@ function Idle() {
   )
 }
 
-export function TrainScreen() {
+export function TrainScreen({ onOpenSettings }: { onOpenSettings: () => void }) {
   // `null` = loaded and no active session; `undefined` = still loading.
   const active = useLiveQuery(async () => (await getActiveSession(db)) ?? null, [])
   if (active === undefined) return null
-  return active ? <ActiveSession session={active} /> : <Idle />
+  return active ? <ActiveSession session={active} /> : <Idle onOpenSettings={onOpenSettings} />
 }

@@ -79,7 +79,7 @@ Descartado por coste/beneficio: mini-app Zepp OS en la pulsera.
 | 1. MVP ✅ | Ejercicios, sesión, registro de series, "la última vez", historial (2026-11-02; kg, catálogo precargado, sesión libre, sin calentamientos) | 1–2 semanas |
 | 2. Progreso | Gráficas, 1RM estimado, PRs, volumen semanal | ~1 semana |
 | 3. Comodidad | Temporizador, plantillas, RPE, calculadora de discos | ~1 semana |
-| 4. Seguridad de datos | Export/import JSON y CSV, almacenamiento persistente, recordatorio de backup | 2–3 días |
+| 4. Seguridad de datos (adelantada, parcial ✅) | Export/import JSON, almacenamiento persistente, recordatorio de backup (2026-11-02). Pendiente: export CSV | 2–3 días |
 | 5. Pulsera | Atajo Salud → PWA, FC/calorías vinculadas a la sesión | ~1 semana |
 | 6. Inteligencia ligera | Sugerencia de progresión, estancamiento, readiness | Opcional |
 | 7. Nativa | Envoltorio o reescritura SwiftUI con HealthKit (si hay Mac) | Opcional |

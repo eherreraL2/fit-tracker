@@ -18,7 +18,7 @@ function App() {
   return (
     <>
       <main className="app">
-        {tab === 'train' && <TrainScreen />}
+        {tab === 'train' && <TrainScreen onOpenSettings={() => setTab('settings')} />}
         {tab === 'history' && <HistoryScreen />}
         {tab === 'exercises' && <ExercisesScreen />}
         {tab === 'settings' && <SettingsScreen />}

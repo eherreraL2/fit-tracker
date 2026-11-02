@@ -53,11 +53,18 @@ export interface WorkSet {
   createdAt: number
 }
 
+/** App-level key/value settings, e.g. `lastBackupAt`. */
+export interface MetaEntry {
+  key: string
+  value: unknown
+}
+
 export type FitDb = Dexie & {
   exercises: EntityTable<Exercise, 'id'>
   sessions: EntityTable<Session, 'id'>
   sessionExercises: EntityTable<SessionExercise, 'id'>
   sets: EntityTable<WorkSet, 'id'>
+  meta: EntityTable<MetaEntry, 'key'>
 }
 
 async function seedExercises(tx: Transaction): Promise<void> {
@@ -80,6 +87,9 @@ export function createDb(name = 'fit-tracker'): FitDb {
     })
     // Existing v1 installs don't fire `populate`, so seed during the upgrade too.
     .upgrade(seedExercises)
+  db.version(3).stores({
+    meta: 'key',
+  })
   db.on('populate', seedExercises)
   return db
 }

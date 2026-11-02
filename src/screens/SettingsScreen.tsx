@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { BackupCard } from '../components/BackupCard'
 import {
   formatBytes,
   getStorageStatus,
@@ -42,6 +43,7 @@ export function SettingsScreen() {
       <header className="screen-header">
         <h1>Ajustes</h1>
       </header>
+      <BackupCard />
       <section className="card">
         <h2>Estado de la app</h2>
         <dl className="checks">
