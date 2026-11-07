@@ -651,7 +651,9 @@ button:disabled {
 
 .tabbar button {
   flex: 1;
+  min-width: 0;
   max-width: 140px;
+  padding: 0;
   height: var(--tabbar-h);
   display: grid;
   place-items: center;

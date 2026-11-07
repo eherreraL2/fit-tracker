@@ -32,7 +32,15 @@ const BODYWEIGHT_METRICS: Metric[] = [
 
 const shortDate = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short' })
 
-export function ExerciseProgress({ exercise, onBack }: { exercise: Exercise; onBack: () => void }) {
+export function ExerciseProgress({
+  exercise,
+  backLabel,
+  onBack,
+}: {
+  exercise: Exercise
+  backLabel: string
+  onBack: () => void
+}) {
   const history = useLiveQuery(() => getExerciseHistory(db, exercise.id), [exercise.id])
   const [metricId, setMetricId] = useState<string | null>(null)
 
@@ -52,7 +60,7 @@ export function ExerciseProgress({ exercise, onBack }: { exercise: Exercise; onB
       <header className="screen-header">
         <div>
           <button type="button" className="link back" onClick={onBack}>
-            ‹ Progreso
+            ‹ {backLabel}
           </button>
           <h1>{exercise.name}</h1>
           <p className="subtitle">
