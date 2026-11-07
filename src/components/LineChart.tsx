@@ -12,6 +12,8 @@ interface LineChartProps {
   formatY: (v: number) => string
   formatX: (v: number) => string
   height?: number
+  /** x values of events to mark with a short tick above the plot (e.g. when each set was logged). */
+  markers?: number[]
 }
 
 const PAD = { top: 16, right: 52, bottom: 26, left: 40 }
@@ -31,7 +33,7 @@ function useWidth<T extends HTMLElement>(): [RefObject<T | null>, number] {
 }
 
 /** Single-series time line chart with a touch crosshair. */
-export function LineChart({ points, label, formatY, formatX, height = 200 }: LineChartProps) {
+export function LineChart({ points, label, formatY, formatX, height = 200, markers = [] }: LineChartProps) {
   const [containerRef, width] = useWidth<HTMLDivElement>()
   const [active, setActive] = useState<number | null>(null)
 
@@ -82,6 +84,11 @@ export function LineChart({ points, label, formatY, formatX, height = 200 }: Lin
           </text>
         )}
 
+        {markers
+          .filter((m) => m >= xMin && m <= xMax)
+          .map((m) => (
+            <line key={m} className="chart-marker" x1={sx(m)} x2={sx(m)} y1={PAD.top - 8} y2={baseline} />
+          ))}
         <path className="chart-area" d={area} />
         <path className="chart-line" d={line} />
         {points.map((_, i) =>

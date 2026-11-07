@@ -80,7 +80,7 @@ Descartado por coste/beneficio: mini-app Zepp OS en la pulsera.
 | 2. Progreso ✅ | Gráficas, 1RM estimado, PRs, volumen semanal (2026-11-06; + ejercicios plegables en sesión tras feedback de uso) | ~1 semana |
 | 3. Comodidad ✅ | Temporizador manual (90 s por defecto, configurable), plantillas, RIR por serie (2026-11-06). Calculadora de discos descartada por el usuario | ~1 semana |
 | 4. Seguridad de datos (adelantada, parcial ✅) | Export/import JSON, almacenamiento persistente, recordatorio de backup (2026-11-02). Pendiente: export CSV | 2–3 días |
-| 5. Pulsera | Atajo Salud → PWA, FC/calorías vinculadas a la sesión | ~1 semana |
+| 5. Pulsera ✅ (pendiente validar en iPhone) | Amazfit → Zepp → Salud → Atajo → portapapeles → importar en Ajustes. FC media/máx., calorías activas, gráfica con marcas de serie y pulso pico por serie si hay datos densos (2026-11-06) | ~1 semana |
 | 6. Inteligencia ligera | Sugerencia de progresión, estancamiento, readiness | Opcional |
 | 7. Nativa | Envoltorio o reescritura SwiftUI con HealthKit (si hay Mac) | Opcional |
 

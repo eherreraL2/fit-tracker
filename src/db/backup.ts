@@ -3,6 +3,7 @@ import {
   MUSCLE_GROUPS,
   type Exercise,
   type FitDb,
+  type HealthSample,
   type Session,
   type SessionExercise,
   type Template,
@@ -25,10 +26,13 @@ export interface Backup {
   sets: WorkSet[]
   /** Added in phase 3; older backups have none. */
   templates: Template[]
+  /** Added in phase 5; older backups have none. */
+  healthSamples: HealthSample[]
 }
 
 export async function buildBackup(db: FitDb, now = Date.now()): Promise<Backup> {
-  return db.transaction('r', [db.exercises, db.sessions, db.sessionExercises, db.sets, db.templates], async () => ({
+  const tables = [db.exercises, db.sessions, db.sessionExercises, db.sets, db.templates, db.healthSamples]
+  return db.transaction('r', tables, async () => ({
     app: APP_ID,
     format: BACKUP_FORMAT,
     exportedAt: now,
@@ -37,6 +41,7 @@ export async function buildBackup(db: FitDb, now = Date.now()): Promise<Backup> 
     sessionExercises: await db.sessionExercises.toArray(),
     sets: await db.sets.toArray(),
     templates: await db.templates.toArray(),
+    healthSamples: await db.healthSamples.toArray(),
   }))
 }
 
@@ -131,12 +136,29 @@ export function parseBackup(raw: unknown): Backup {
             isTime(r.updatedAt),
         )
   ) as unknown as Template[]
+  const healthSamples = (
+    raw.healthSamples === undefined
+      ? []
+      : records(
+          raw,
+          'healthSamples',
+          (r) =>
+            isId(r.id) &&
+            isId(r.sessionId) &&
+            (r.type === 'hr' || r.type === 'kcal') &&
+            isTime(r.start) &&
+            isTime(r.end) &&
+            typeof r.value === 'number' &&
+            Number.isFinite(r.value),
+        )
+  ) as unknown as HealthSample[]
 
   const exerciseIds = assertUniqueIds(exercises, 'exercises')
   const sessionIds = assertUniqueIds(sessions, 'sessions')
   assertUniqueIds(sessionExercises, 'sessionExercises')
   assertUniqueIds(sets, 'sets')
   assertUniqueIds(templates, 'templates')
+  assertUniqueIds(healthSamples, 'healthSamples')
   if (sessions.filter((s) => s.endedAt === null).length > 1) fail('hay más de una sesión en curso')
 
   const seById = new Map(sessionExercises.map((se) => [se.id, se]))
@@ -148,6 +170,7 @@ export function parseBackup(raw: unknown): Backup {
     if (!se || se.sessionId !== s.sessionId || se.exerciseId !== s.exerciseId) fail('referencias rotas en series')
   }
   if (templates.some((t) => t.exerciseIds.some((id) => !exerciseIds.has(id)))) fail('referencias rotas en plantillas')
+  if (healthSamples.some((h) => !sessionIds.has(h.sessionId))) fail('referencias rotas en datos de salud')
 
   return {
     app: APP_ID,
@@ -158,12 +181,13 @@ export function parseBackup(raw: unknown): Backup {
     sessionExercises,
     sets,
     templates,
+    healthSamples,
   }
 }
 
 /** Replaces all workout data with the backup's contents. */
 export async function restoreBackup(db: FitDb, backup: Backup): Promise<void> {
-  const tables = [db.exercises, db.sessions, db.sessionExercises, db.sets, db.templates]
+  const tables = [db.exercises, db.sessions, db.sessionExercises, db.sets, db.templates, db.healthSamples]
   await db.transaction('rw', [...tables, db.meta], async () => {
     await Promise.all(tables.map((t) => t.clear()))
     await db.exercises.bulkAdd(backup.exercises)
@@ -171,6 +195,7 @@ export async function restoreBackup(db: FitDb, backup: Backup): Promise<void> {
     await db.sessionExercises.bulkAdd(backup.sessionExercises)
     await db.sets.bulkAdd(backup.sets)
     await db.templates.bulkAdd(backup.templates)
+    await db.healthSamples.bulkAdd(backup.healthSamples)
     await db.meta.put({ key: LAST_BACKUP_KEY, value: backup.exportedAt })
   })
 }

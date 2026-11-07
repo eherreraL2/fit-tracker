@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { BackupCard } from '../components/BackupCard'
+import { HealthImportCard } from '../components/HealthImportCard'
 import { db } from '../db/db'
 import { getRestSeconds, REST_OPTIONS, setRestSeconds } from '../db/settings'
 import { formatElapsed } from '../lib/format'
@@ -65,6 +66,7 @@ export function SettingsScreen() {
           ))}
         </div>
       </section>
+      <HealthImportCard />
       <BackupCard />
       <section className="card">
         <h2>Estado de la app</h2>

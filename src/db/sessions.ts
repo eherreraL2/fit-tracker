@@ -107,16 +107,17 @@ export async function deleteSet(db: FitDb, setId: number): Promise<void> {
 }
 
 export async function deleteSession(db: FitDb, sessionId: number): Promise<void> {
-  await db.transaction('rw', db.sessions, db.sessionExercises, db.sets, async () => {
+  await db.transaction('rw', [db.sessions, db.sessionExercises, db.sets, db.healthSamples], async () => {
     await db.sets.where({ sessionId }).delete()
     await db.sessionExercises.where({ sessionId }).delete()
+    await db.healthSamples.where({ sessionId }).delete()
     await db.sessions.delete(sessionId)
   })
 }
 
 /** Ends the session, dropping exercises with no sets. Returns false if the session was empty and got deleted. */
 export async function finishSession(db: FitDb, sessionId: number, now = Date.now()): Promise<boolean> {
-  return db.transaction('rw', db.sessions, db.sessionExercises, db.sets, async () => {
+  return db.transaction('rw', [db.sessions, db.sessionExercises, db.sets, db.healthSamples], async () => {
     const sets = await db.sets.where({ sessionId }).toArray()
     if (sets.length === 0) {
       await deleteSession(db, sessionId)

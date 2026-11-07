@@ -64,6 +64,21 @@ export interface Template {
   updatedAt: number
 }
 
+export type HealthSampleType = 'hr' | 'kcal'
+
+/**
+ * A reading imported from Apple Health (written there by Zepp), attached to the session it falls in.
+ * `hr`: beats per minute at `start`. `kcal`: active energy burned between `start` and `end`.
+ */
+export interface HealthSample {
+  id: number
+  sessionId: number
+  type: HealthSampleType
+  start: number
+  end: number
+  value: number
+}
+
 /** App-level key/value settings, e.g. `lastBackupAt`. */
 export interface MetaEntry {
   key: string
@@ -77,6 +92,7 @@ export type FitDb = Dexie & {
   sets: EntityTable<WorkSet, 'id'>
   meta: EntityTable<MetaEntry, 'key'>
   templates: EntityTable<Template, 'id'>
+  healthSamples: EntityTable<HealthSample, 'id'>
 }
 
 async function seedExercises(tx: Transaction): Promise<void> {
@@ -104,6 +120,9 @@ export function createDb(name = 'fit-tracker'): FitDb {
   })
   db.version(4).stores({
     templates: '++id, name',
+  })
+  db.version(5).stores({
+    healthSamples: '++id, sessionId, [type+start]',
   })
   db.on('populate', seedExercises)
   return db

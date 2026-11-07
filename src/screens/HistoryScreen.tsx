@@ -1,14 +1,19 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
+import { HeartRateCard } from '../components/HeartRateCard'
 import { TemplateEditor } from '../components/TemplateEditor'
 import { db } from '../db/db'
+import { getSessionHealth, setPeaks } from '../db/health'
 import { deleteSession, getSessionDetail, listFinishedSessions, setVolume, type SessionSummary } from '../db/sessions'
 import { formatDate, formatDuration, formatKg, formatTime } from '../lib/format'
 
 function SessionDetailView({ summary, onBack }: { summary: SessionSummary; onBack: () => void }) {
   const { session } = summary
   const detail = useLiveQuery(() => getSessionDetail(db, session.id), [session.id])
+  const health = useLiveQuery(() => getSessionHealth(db, session.id), [session.id])
   const [savingTemplate, setSavingTemplate] = useState(false)
+  const allSets = detail?.flatMap((d) => d.sets) ?? []
+  const peaks = health?.dense ? setPeaks(allSets, health.heartRate) : new Map<number, number>()
 
   async function onDelete() {
     if (!window.confirm('¿Borrar este entrenamiento del historial? No se puede deshacer.')) return
@@ -31,6 +36,8 @@ function SessionDetailView({ summary, onBack }: { summary: SessionSummary; onBac
         </div>
       </header>
 
+      {health && <HeartRateCard health={health} setTimes={allSets.map((s) => s.createdAt)} />}
+
       {detail?.map(({ sessionExercise, exercise, sets }) => (
         <section key={sessionExercise.id} className="card">
           <h2>{exercise.name}</h2>
@@ -42,6 +49,11 @@ function SessionDetailView({ summary, onBack }: { summary: SessionSummary; onBac
                   {formatKg(s.weightKg)} kg × {s.reps}
                   {s.rir != null && <small className="rir"> · RIR {s.rir}</small>}
                 </span>
+                {peaks.has(s.id) && (
+                  <small className="hr-peak" title="Pulso máximo en esa serie">
+                    ♥ {peaks.get(s.id)}
+                  </small>
+                )}
               </li>
             ))}
           </ol>
