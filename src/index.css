@@ -372,6 +372,244 @@ button:disabled {
   color: var(--muted);
 }
 
+.logger.collapsed {
+  padding: 0;
+}
+
+.logger-summary,
+.logger-title {
+  background: none;
+  color: var(--text);
+  font-weight: 400;
+  border-radius: 14px;
+  text-align: left;
+}
+
+.logger-title {
+  padding: 0;
+}
+
+.logger-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+}
+
+.logger-summary > span:first-child {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.logger-summary small {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  color: var(--muted);
+  font-size: 1.3rem;
+}
+
+.pr-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(232, 255, 90, 0.12);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* ---------- progress ---------- */
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.segmented button {
+  flex: 1;
+  padding: 8px 6px;
+  background: none;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
+.segmented button[aria-selected='true'] {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.segmented.small {
+  background: var(--bg);
+}
+
+.segmented.small button {
+  font-size: 0.82rem;
+}
+
+.chart {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.chart svg {
+  display: block;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-tick {
+  fill: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-area {
+  fill: var(--accent);
+  opacity: 0.1;
+}
+
+.chart-dot {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 2;
+}
+
+.chart-end-label {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chart-crosshair {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.chart-tooltip {
+  position: absolute;
+  top: -6px;
+  width: 120px;
+  display: grid;
+  justify-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.chart-tooltip span {
+  color: var(--muted);
+}
+
+.session-table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.session-table li {
+  display: grid;
+  grid-template-columns: 6.5em 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.week-nav .icon-button {
+  font-size: 1.4rem;
+  color: var(--text);
+}
+
+.bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.bars li {
+  display: grid;
+  grid-template-columns: 7.5em 1fr 3.5em;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.bar-track {
+  position: relative;
+  height: 14px;
+}
+
+.bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+
+.bar-avg {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+  box-shadow: 0 0 0 2px var(--surface);
+  border-radius: 1px;
+}
+
+.bar-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.bar-value small {
+  color: var(--muted);
+  font-weight: 400;
+}
+
 /* ---------- settings ---------- */
 
 .checks {

@@ -28,10 +28,13 @@ function ActiveSession({ session }: { session: Session }) {
   const now = useNow(1000)
   const detail = useLiveQuery(() => getSessionDetail(db, session.id), [session.id])
   const [picking, setPicking] = useState(false)
+  // Only one exercise is open at a time; by default the most recently added one.
+  const [openId, setOpenId] = useState<number | 'none' | null>(null)
+  const expandedId = openId ?? detail?.at(-1)?.sessionExercise.id
 
   async function onPick(exerciseId: number) {
     setPicking(false)
-    await addExerciseToSession(db, session.id, exerciseId)
+    setOpenId(await addExerciseToSession(db, session.id, exerciseId))
   }
 
   async function onFinish() {
@@ -63,7 +66,13 @@ function ActiveSession({ session }: { session: Session }) {
         </button>
       </header>
 
-      {detail?.map((d) => <ExerciseLogger key={d.sessionExercise.id} detail={d} />)}
+      {detail?.map((d) => {
+        const id = d.sessionExercise.id
+        const expanded = id === expandedId
+        return (
+          <ExerciseLogger key={id} detail={d} expanded={expanded} onToggle={() => setOpenId(expanded ? 'none' : id)} />
+        )
+      })}
 
       <button type="button" className="secondary full big" onClick={() => setPicking(true)}>
         + Añadir ejercicio

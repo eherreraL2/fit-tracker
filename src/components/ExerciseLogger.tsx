@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState, type FormEvent } from 'react'
 import { db } from '../db/db'
+import { getPriorBests, markRecordSets } from '../db/progress'
 import type { SessionExerciseDetail } from '../db/sessions'
 import { addSet, deleteSet, getLastPerformance, removeSessionExercise } from '../db/sessions'
 import { formatDate, formatKg, formatSet, parseNumber } from '../lib/format'
@@ -8,16 +9,24 @@ import { suggestNextSet } from '../lib/suggest'
 
 interface ExerciseLoggerProps {
   detail: SessionExerciseDetail
+  expanded: boolean
+  onToggle: () => void
 }
 
 const WEIGHT_STEP = 2.5
 
-export function ExerciseLogger({ detail }: ExerciseLoggerProps) {
+export function ExerciseLogger({ detail, expanded, onToggle }: ExerciseLoggerProps) {
   const { sessionExercise, exercise, sets } = detail
   const last = useLiveQuery(
     () => getLastPerformance(db, exercise.id, sessionExercise.sessionId),
     [exercise.id, sessionExercise.sessionId],
   )
+  const priorBests = useLiveQuery(
+    () => getPriorBests(db, exercise.id, sessionExercise.sessionId),
+    [exercise.id, sessionExercise.sessionId],
+  )
+  const recordFlags = markRecordSets(sets, priorBests ?? null)
+  const recordCount = recordFlags.filter(Boolean).length
   const suggestion = suggestNextSet(sets, last?.sets)
   // Inputs stay empty until edited; the placeholder shows the suggestion and is used if left blank.
   const [weight, setWeight] = useState('')
@@ -54,10 +63,35 @@ export function ExerciseLogger({ detail }: ExerciseLoggerProps) {
     await removeSessionExercise(db, sessionExercise.id)
   }
 
+  if (!expanded) {
+    return (
+      <section className="card logger collapsed">
+        <button type="button" className="logger-summary" onClick={onToggle} aria-expanded="false">
+          <span>
+            <strong>{exercise.name}</strong>
+            <small>
+              {sets.length === 0 ? 'Sin series' : `${sets.length} series · ${sets.map(formatSet).join(' · ')}`}
+            </small>
+          </span>
+          {recordCount > 0 && (
+            <span className="pr-badge" aria-label={`${recordCount} récords`}>
+              🏆 {recordCount}
+            </span>
+          )}
+          <span className="chevron" aria-hidden="true">
+            ›
+          </span>
+        </button>
+      </section>
+    )
+  }
+
   return (
     <section className="card logger">
       <div className="logger-header">
-        <h2>{exercise.name}</h2>
+        <button type="button" className="logger-title" onClick={onToggle} aria-expanded="true">
+          <h2>{exercise.name}</h2>
+        </button>
         <button type="button" className="link danger" onClick={onRemove}>
           Quitar
         </button>
@@ -76,6 +110,7 @@ export function ExerciseLogger({ detail }: ExerciseLoggerProps) {
               <span className="set-value">
                 {formatKg(s.weightKg)} kg × {s.reps}
               </span>
+              {recordFlags[i] && <span className="pr-badge">🏆 Récord</span>}
               <button
                 type="button"
                 className="icon-button"
