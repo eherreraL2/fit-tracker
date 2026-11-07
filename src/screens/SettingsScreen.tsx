@@ -1,5 +1,9 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { BackupCard } from '../components/BackupCard'
+import { db } from '../db/db'
+import { getRestSeconds, REST_OPTIONS, setRestSeconds } from '../db/settings'
+import { formatElapsed } from '../lib/format'
 import {
   formatBytes,
   getStorageStatus,
@@ -17,6 +21,7 @@ function yesNo(value: boolean | null): string {
 
 export function SettingsScreen() {
   const [storage, setStorage] = useState<StorageStatus | null>(null)
+  const restSeconds = useLiveQuery(() => getRestSeconds(db), [])
 
   useEffect(() => {
     let cancelled = false
@@ -43,6 +48,23 @@ export function SettingsScreen() {
       <header className="screen-header">
         <h1>Ajustes</h1>
       </header>
+      <section className="card">
+        <h2>Descanso entre series</h2>
+        <p className="hint">Duración con la que arranca el temporizador. Puedes ajustarla ±15 s en cada descanso.</p>
+        <div className="segmented small" role="radiogroup" aria-label="Duración del descanso">
+          {REST_OPTIONS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              role="radio"
+              aria-checked={s === restSeconds}
+              onClick={() => void setRestSeconds(db, s)}
+            >
+              {formatElapsed(s * 1000)}
+            </button>
+          ))}
+        </div>
+      </section>
       <BackupCard />
       <section className="card">
         <h2>Estado de la app</h2>

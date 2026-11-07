@@ -3,6 +3,7 @@ import type { Exercise, FitDb, Session, SessionExercise, WorkSet } from './db'
 export interface SetInput {
   weightKg: number
   reps: number
+  rir?: number | null
 }
 
 export interface LastPerformance {
@@ -26,15 +27,21 @@ export interface SessionSummary {
 
 export const MAX_WEIGHT_KG = 1000
 export const MAX_REPS = 200
+export const MAX_RIR = 10
 
-export function validateSet({ weightKg, reps }: SetInput): SetInput {
+export function isValidRir(rir: unknown): boolean {
+  return rir === undefined || rir === null || (Number.isInteger(rir) && (rir as number) >= 0 && (rir as number) <= MAX_RIR)
+}
+
+export function validateSet({ weightKg, reps, rir = null }: SetInput): Required<SetInput> {
   if (!Number.isFinite(weightKg) || weightKg < 0 || weightKg > MAX_WEIGHT_KG) {
     throw new Error(`El peso debe estar entre 0 y ${MAX_WEIGHT_KG} kg`)
   }
   if (!Number.isInteger(reps) || reps < 1 || reps > MAX_REPS) {
     throw new Error(`Las repeticiones deben ser un entero entre 1 y ${MAX_REPS}`)
   }
-  return { weightKg: Math.round(weightKg * 100) / 100, reps }
+  if (!isValidRir(rir)) throw new Error(`El RIR debe ser un entero entre 0 y ${MAX_RIR}`)
+  return { weightKg: Math.round(weightKg * 100) / 100, reps, rir }
 }
 
 export function setVolume(sets: Pick<WorkSet, 'weightKg' | 'reps'>[]): number {
@@ -71,7 +78,7 @@ export async function removeSessionExercise(db: FitDb, sessionExerciseId: number
 }
 
 export async function addSet(db: FitDb, sessionExerciseId: number, input: SetInput, now = Date.now()): Promise<number> {
-  const { weightKg, reps } = validateSet(input)
+  const { weightKg, reps, rir } = validateSet(input)
   return db.transaction('rw', db.sessionExercises, db.sets, async () => {
     const se = await db.sessionExercises.get(sessionExerciseId)
     if (!se) throw new Error('El ejercicio ya no forma parte de la sesión')
@@ -83,6 +90,7 @@ export async function addSet(db: FitDb, sessionExerciseId: number, input: SetInp
       order,
       weightKg,
       reps,
+      rir,
       createdAt: now,
     })
   })

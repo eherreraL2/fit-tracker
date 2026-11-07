@@ -50,7 +50,18 @@ export interface WorkSet {
   order: number
   weightKg: number
   reps: number
+  /** Reps in reserve (0 = failure). Absent on sets logged before phase 3 or when not recorded. */
+  rir?: number | null
   createdAt: number
+}
+
+/** A saved, ordered list of exercises to start a session from. */
+export interface Template {
+  id: number
+  name: string
+  exerciseIds: number[]
+  createdAt: number
+  updatedAt: number
 }
 
 /** App-level key/value settings, e.g. `lastBackupAt`. */
@@ -65,6 +76,7 @@ export type FitDb = Dexie & {
   sessionExercises: EntityTable<SessionExercise, 'id'>
   sets: EntityTable<WorkSet, 'id'>
   meta: EntityTable<MetaEntry, 'key'>
+  templates: EntityTable<Template, 'id'>
 }
 
 async function seedExercises(tx: Transaction): Promise<void> {
@@ -89,6 +101,9 @@ export function createDb(name = 'fit-tracker'): FitDb {
     .upgrade(seedExercises)
   db.version(3).stores({
     meta: 'key',
+  })
+  db.version(4).stores({
+    templates: '++id, name',
   })
   db.on('populate', seedExercises)
   return db

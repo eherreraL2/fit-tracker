@@ -78,7 +78,7 @@ Descartado por coste/beneficio: mini-app Zepp OS en la pulsera.
 | 0. Prueba de concepto ✅ | Vite "hola mundo" publicado, instalado en el iPhone, offline y persistencia verificados (2026-11-02, https://eherreral2.github.io/fit-tracker/) | 1 tarde |
 | 1. MVP ✅ | Ejercicios, sesión, registro de series, "la última vez", historial (2026-11-02; kg, catálogo precargado, sesión libre, sin calentamientos) | 1–2 semanas |
 | 2. Progreso ✅ | Gráficas, 1RM estimado, PRs, volumen semanal (2026-11-06; + ejercicios plegables en sesión tras feedback de uso) | ~1 semana |
-| 3. Comodidad | Temporizador, plantillas, RPE, calculadora de discos | ~1 semana |
+| 3. Comodidad ✅ | Temporizador manual (90 s por defecto, configurable), plantillas, RIR por serie (2026-11-06). Calculadora de discos descartada por el usuario | ~1 semana |
 | 4. Seguridad de datos (adelantada, parcial ✅) | Export/import JSON, almacenamiento persistente, recordatorio de backup (2026-11-02). Pendiente: export CSV | 2–3 días |
 | 5. Pulsera | Atajo Salud → PWA, FC/calorías vinculadas a la sesión | ~1 semana |
 | 6. Inteligencia ligera | Sugerencia de progresión, estancamiento, readiness | Opcional |

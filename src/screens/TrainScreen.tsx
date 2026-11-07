@@ -2,8 +2,11 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { ExerciseLogger } from '../components/ExerciseLogger'
 import { ExercisePicker } from '../components/ExercisePicker'
+import { RestTimer } from '../components/RestTimer'
+import { TemplateEditor } from '../components/TemplateEditor'
 import { isBackupDue } from '../db/backup'
-import { db, type Session } from '../db/db'
+import { db, type Session, type Template } from '../db/db'
+import { listTemplates, startSessionFromTemplate } from '../db/templates'
 import {
   addExerciseToSession,
   deleteSession,
@@ -12,6 +15,7 @@ import {
   getSessionDetail,
   listFinishedSessions,
   startSession,
+  type SessionExerciseDetail,
 } from '../db/sessions'
 import { formatDate, formatElapsed } from '../lib/format'
 
@@ -24,13 +28,23 @@ function useNow(intervalMs: number): number {
   return now
 }
 
+function defaultOpenId(detail: SessionExerciseDetail[]): number | undefined {
+  let latest: { id: number; at: number } | null = null
+  for (const d of detail) {
+    const at = d.sets.at(-1)?.createdAt
+    if (at !== undefined && (!latest || at > latest.at)) latest = { id: d.sessionExercise.id, at }
+  }
+  return latest?.id ?? detail[0]?.sessionExercise.id
+}
+
 function ActiveSession({ session }: { session: Session }) {
   const now = useNow(1000)
   const detail = useLiveQuery(() => getSessionDetail(db, session.id), [session.id])
   const [picking, setPicking] = useState(false)
   // Only one exercise is open at a time; by default the most recently added one.
+  // Until the user picks one (or after a reload): the exercise of the latest set, else the first one (template order).
   const [openId, setOpenId] = useState<number | 'none' | null>(null)
-  const expandedId = openId ?? detail?.at(-1)?.sessionExercise.id
+  const expandedId = openId ?? defaultOpenId(detail ?? [])
 
   async function onPick(exerciseId: number) {
     setPicking(false)
@@ -70,7 +84,13 @@ function ActiveSession({ session }: { session: Session }) {
         const id = d.sessionExercise.id
         const expanded = id === expandedId
         return (
-          <ExerciseLogger key={id} detail={d} expanded={expanded} onToggle={() => setOpenId(expanded ? 'none' : id)} />
+          <ExerciseLogger
+            key={id}
+            detail={d}
+            expanded={expanded}
+            onToggle={() => setOpenId(expanded ? 'none' : id)}
+            onSetAdded={() => setOpenId(id)}
+          />
         )
       })}
 
@@ -81,6 +101,8 @@ function ActiveSession({ session }: { session: Session }) {
         Descartar entrenamiento
       </button>
 
+      <RestTimer />
+
       {picking && (
         <ExercisePicker
           excludeIds={detail?.map((d) => d.exercise.id) ?? []}
@@ -89,6 +111,45 @@ function ActiveSession({ session }: { session: Session }) {
         />
       )}
     </>
+  )
+}
+
+function Templates() {
+  const templates = useLiveQuery(() => listTemplates(db), [])
+  const names = useLiveQuery(async () => new Map((await db.exercises.toArray()).map((e) => [e.id, e.name])), [])
+  const [editing, setEditing] = useState<Template | 'new' | null>(null)
+
+  return (
+    <section className="card">
+      <div className="logger-header">
+        <h2>Plantillas</h2>
+        <button type="button" className="link" onClick={() => setEditing('new')}>
+          + Nueva
+        </button>
+      </div>
+      {templates?.length === 0 && (
+        <p className="hint">Guarda una lista de ejercicios para empezar con ella. También desde una sesión del Historial.</p>
+      )}
+      <ul className="template-cards">
+        {templates?.map((t) => (
+          <li key={t.id}>
+            <button type="button" className="template-start" onClick={() => void startSessionFromTemplate(db, t.id)}>
+              <strong>{t.name}</strong>
+              <small>{t.exerciseIds.map((id) => names?.get(id) ?? '…').join(' · ')}</small>
+            </button>
+            <button type="button" className="link" onClick={() => setEditing(t)}>
+              Editar
+            </button>
+          </li>
+        ))}
+      </ul>
+      {editing && (
+        <TemplateEditor
+          template={editing === 'new' ? { name: '', exerciseIds: [] } : editing}
+          onClose={() => setEditing(null)}
+        />
+      )}
+    </section>
   )
 }
 
@@ -108,8 +169,9 @@ function Idle({ onOpenSettings }: { onOpenSettings: () => void }) {
         </button>
       )}
       <button type="button" className="full big" onClick={() => void startSession(db)}>
-        Empezar entrenamiento
+        Empezar entrenamiento libre
       </button>
+      <Templates />
       {last && (
         <section className="card">
           <h2>Último entrenamiento</h2>

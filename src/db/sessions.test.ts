@@ -94,7 +94,7 @@ describe('sessions', () => {
     expect(() => validateSet({ weightKg: 50, reps: 0 })).toThrow()
     expect(() => validateSet({ weightKg: 50, reps: 2.5 })).toThrow()
     expect(() => validateSet({ weightKg: Number.NaN, reps: 5 })).toThrow()
-    expect(validateSet({ weightKg: 0, reps: 10 })).toEqual({ weightKg: 0, reps: 10 })
+    expect(validateSet({ weightKg: 0, reps: 10 })).toEqual({ weightKg: 0, reps: 10, rir: null })
   })
 
   it('renumbers sets after deleting one', async () => {

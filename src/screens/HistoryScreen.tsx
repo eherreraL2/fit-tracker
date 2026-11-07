@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
+import { TemplateEditor } from '../components/TemplateEditor'
 import { db } from '../db/db'
 import { deleteSession, getSessionDetail, listFinishedSessions, setVolume, type SessionSummary } from '../db/sessions'
 import { formatDate, formatDuration, formatKg, formatTime } from '../lib/format'
@@ -7,6 +8,7 @@ import { formatDate, formatDuration, formatKg, formatTime } from '../lib/format'
 function SessionDetailView({ summary, onBack }: { summary: SessionSummary; onBack: () => void }) {
   const { session } = summary
   const detail = useLiveQuery(() => getSessionDetail(db, session.id), [session.id])
+  const [savingTemplate, setSavingTemplate] = useState(false)
 
   async function onDelete() {
     if (!window.confirm('¿Borrar este entrenamiento del historial? No se puede deshacer.')) return
@@ -38,6 +40,7 @@ function SessionDetailView({ summary, onBack }: { summary: SessionSummary; onBac
                 <span className="set-number">{i + 1}</span>
                 <span className="set-value">
                   {formatKg(s.weightKg)} kg × {s.reps}
+                  {s.rir != null && <small className="rir"> · RIR {s.rir}</small>}
                 </span>
               </li>
             ))}
@@ -46,9 +49,18 @@ function SessionDetailView({ summary, onBack }: { summary: SessionSummary; onBac
         </section>
       ))}
 
+      <button type="button" className="secondary full" onClick={() => setSavingTemplate(true)}>
+        Guardar como plantilla
+      </button>
       <button type="button" className="link danger centered" onClick={onDelete}>
         Borrar entrenamiento
       </button>
+      {savingTemplate && detail && (
+        <TemplateEditor
+          template={{ name: '', exerciseIds: detail.map((d) => d.exercise.id) }}
+          onClose={() => setSavingTemplate(false)}
+        />
+      )}
     </>
   )
 }

@@ -11,11 +11,14 @@ interface ExerciseLoggerProps {
   detail: SessionExerciseDetail
   expanded: boolean
   onToggle: () => void
+  onSetAdded: () => void
 }
 
 const WEIGHT_STEP = 2.5
+/** Reps in reserve; the last choice means "that many or more". */
+const RIR_CHOICES = [0, 1, 2, 3, 4] as const
 
-export function ExerciseLogger({ detail, expanded, onToggle }: ExerciseLoggerProps) {
+export function ExerciseLogger({ detail, expanded, onToggle, onSetAdded }: ExerciseLoggerProps) {
   const { sessionExercise, exercise, sets } = detail
   const last = useLiveQuery(
     () => getLastPerformance(db, exercise.id, sessionExercise.sessionId),
@@ -31,6 +34,7 @@ export function ExerciseLogger({ detail, expanded, onToggle }: ExerciseLoggerPro
   // Inputs stay empty until edited; the placeholder shows the suggestion and is used if left blank.
   const [weight, setWeight] = useState('')
   const [reps, setReps] = useState('')
+  const [rir, setRir] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const effectiveWeight = weight === '' ? (suggestion?.weightKg ?? Number.NaN) : parseNumber(weight)
@@ -49,10 +53,12 @@ export function ExerciseLogger({ detail, expanded, onToggle }: ExerciseLoggerPro
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
     try {
-      await addSet(db, sessionExercise.id, { weightKg: effectiveWeight, reps: effectiveReps })
+      await addSet(db, sessionExercise.id, { weightKg: effectiveWeight, reps: effectiveReps, rir })
       setWeight('')
       setReps('')
+      setRir(null)
       setError(null)
+      onSetAdded()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     }
@@ -109,6 +115,7 @@ export function ExerciseLogger({ detail, expanded, onToggle }: ExerciseLoggerPro
               <span className="set-number">{i + 1}</span>
               <span className="set-value">
                 {formatKg(s.weightKg)} kg × {s.reps}
+                {s.rir != null && <small className="rir"> · RIR {s.rir}</small>}
               </span>
               {recordFlags[i] && <span className="pr-badge">🏆 Récord</span>}
               <button
@@ -160,6 +167,19 @@ export function ExerciseLogger({ detail, expanded, onToggle }: ExerciseLoggerPro
           <button type="button" aria-label="Más repeticiones" onClick={() => bumpReps(1)}>
             +
           </button>
+        </div>
+        <div className="rir-picker" role="group" aria-label="Repeticiones en reserva (opcional)">
+          <span>RIR</span>
+          {RIR_CHOICES.map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={rir === value}
+              onClick={() => setRir(rir === value ? null : value)}
+            >
+              {value === RIR_CHOICES.at(-1) ? `${value}+` : value}
+            </button>
+          ))}
         </div>
         <button type="submit" className="full">
           Añadir serie {sets.length + 1}
